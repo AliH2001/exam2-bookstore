@@ -41,7 +41,12 @@ def create_book():
 # - Return {"error": "Book not found"} with status 404 if not found
 
 # TODO: Implement this endpoint
-
+@app.route("/books/<int:book_id>", methods=["GET"])
+def get_single_book(book_id):
+    book = get_book(book_id)
+    if book is None:
+        return jsonify({"error": "Book not found"}), 404
+    return jsonify({"book": book}), 200
 
 # ----- ENDPOINT 4: Update a book (TODO) -----
 # Route: PUT /books/<int:book_id>
@@ -52,6 +57,19 @@ def create_book():
 
 # TODO: Implement this endpoint
 
+@app.route("/books/<int:book_id>", methods=["PUT"])
+def update_single_book(book_id):
+    book = get_book(book_id)
+    if book is None:
+        return jsonify({"error": "Book not found"}), 404
+    data = request.get_json()
+    price = data.get("price")
+    if price is not None and price <= 0:
+        return jsonify({"error": "Price must be a positive number"}), 400
+    update_book(book_id, title=data.get("title"), author=data.get("author"), price=price)
+    updated_book = get_book(book_id)
+    return jsonify({"book": updated_book}), 200
+
 
 # ----- ENDPOINT 5: Delete a book (TODO) -----
 # Route: DELETE /books/<int:book_id>
@@ -59,7 +77,13 @@ def create_book():
 # - Return {"error": "..."} with status 404 if not found
 
 # TODO: Implement this endpoint
-
+@app.route("/books/<int:book_id>", methods=["DELETE"])
+def delete_single_book(book_id):
+    book = get_book(book_id)
+    if book is None:
+        return jsonify({"error": "Book not found"}), 404
+    delete_book(book_id)
+    return jsonify({"message": "Book deleted"}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
